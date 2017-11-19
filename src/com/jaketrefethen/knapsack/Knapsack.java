@@ -28,6 +28,29 @@ public class Knapsack {
 	}
 	
 	public int fitness() {
+		return fitnessConvergenceFixed();
+	}
+	
+	public int fitnessFlatFail() {
+		// this is the fitness function from the assignment
+		int weight = 0;
+		int value = 0;
+		for (Item i : items.keySet()) {
+			if (items.get(i)) {
+				weight += i.weight;
+				value += i.value;
+			}
+		}
+		if (weight > problem.maxWeight)
+			return 0;
+		else
+			return value;
+	}
+	
+	public int fitnessOverweightPenalty() {
+		// this penalizes sacks that are overweight
+		// in proportion to how overweight the sack is
+		// in the form of a negative value that grows with overweight-ness
 		int weight = 0;
 		int value = 0;
 		for (Item i : items.keySet()) {
@@ -38,6 +61,46 @@ public class Knapsack {
 		}
 		if (weight > problem.maxWeight)
 			return problem.maxWeight - weight;
+		else
+			return value;
+	}
+	
+	public int fitnessConvergence() {
+		// this one is interesting, it allows for over-filled sacks
+		// the idea is that if you are over by just a bit, then
+		// you are more fit than a sack that is barely filled at all
+		// issue is it can spit out actually wrong answers
+		// but it generates technically closer answers faster
+		int weight = 0;
+		int value = 0;
+		for (Item i : items.keySet()) {
+			if (items.get(i)) {
+				weight += i.weight;
+				value += i.value;
+			}
+		}
+		if (problem.maxWeight == weight)
+			return value;
+		return value / Math.abs(problem.maxWeight - weight)+1;
+	}
+	
+	public int fitnessConvergenceFixed() {
+		// this is an attempt to keep the goods
+		// of convergence and also fix the overweight
+		// allowance
+		int weight = 0;
+		int value = 0;
+		for (Item i : items.keySet()) {
+			if (items.get(i)) {
+				weight += i.weight;
+				value += i.value;
+			}
+		}
+
+		if (weight < problem.maxWeight)
+			return value / Math.abs(problem.maxWeight - weight)+1;
+		if (weight > problem.maxWeight)
+			return value / Math.abs(problem.maxWeight - weight)+4;
 		else
 			return value;
 	}
